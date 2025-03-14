@@ -38,7 +38,7 @@ defmodule RealDealApi.Users do
   def get_user!(id), do: Repo.get!(User, id)
 
   @doc """
-  Creates a user.
+  Create a user and associate it with an account.
 
   ## Examples
 
@@ -49,11 +49,15 @@ defmodule RealDealApi.Users do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_user(attrs \\ %{}) do
-    %User{}
+  def create_user(account, attrs \\ %{}) do
+    account
+    |> Ecto.build_assoc(:user)
     |> User.changeset(attrs)
     |> Repo.insert()
   end
+
+  # ↑↑↑ `Ecto.build_assoc` ↑↑↑:
+  # https://hexdocs.pm/ecto/Ecto.html#build_assoc/3
 
   @doc """
   Updates a user.

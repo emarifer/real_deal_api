@@ -10,7 +10,9 @@ defmodule RealDealApiWeb.Router do
 
     get "/", DefaultController, :index
 
-    resources "/accounts", AccountController, except: [:new, :edit]
+    post "/accounts", AccountController, :create
+
+    # resources "/accounts", AccountController, except: [:new, :edit]
     resources "/users", UserController, except: [:new, :edit]
   end
 end
@@ -39,3 +41,21 @@ end
 
 # e.g:
 # mix ecto.rollback --to 20080906120000
+
+# Testing the path: post "/accounts", AccountController, :create
+# {
+# 	"account": {
+# 		"email": "client1@realdealapi.com",
+# 		"hash_password": "real_password",
+# 		"full_name": "Blork Erlang",
+# 		"gender": "null",
+# 		"biography": "null"
+# 	}
+# } ==>
+# {
+# 	"data": {
+# 		"id": "f3e41f5a-16ad-465d-a287-6142d774d69c",
+# 		"token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJyZWFsX2RlYWxfYXBpIiwiZXhwIjoxNzQ0Mzg5ODI4LCJpYXQiOjE3NDE5NzA2MjgsImlzcyI6InJlYWxfZGVhbF9hcGkiLCJqdGkiOiJjYjBhZjhlZi05MTUwLTQ4ZTgtYjNhMS02MzIxZDk0OTI2ZDIiLCJuYmYiOjE3NDE5NzA2MjcsInN1YiI6ImYzZTQxZjVhLTE2YWQtNDY1ZC1hMjg3LTYxNDJkNzc0ZDY5YyIsInR5cCI6ImFjY2VzcyJ9.IRaWzz1PBf8RUBxAmmLSUb4OlkHEkm_YEAuyyOhJAJPMb6u4aj5lYatmZdD8QUttfiHYWoM4cvHHCM8-XT-JEQ",
+# 		"email": "client1@realdealapi.com"
+# 	}
+# }

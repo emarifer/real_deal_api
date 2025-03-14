@@ -193,3 +193,14 @@ end
 # }
 # Secret: => valid secret
 # eUn5rc3c7LozyE9B7sZPZWh+ZHse4Tv8ti0/9ZZH7Lz2jjpsltSAAmYT38p4+YU2
+
+# If, for example, an email address that is already in the database is used,
+# this will be the error we will receive:
+# Status 422 ("Unprocessable Entity") ==>
+# {
+# 	"errors": {
+# 		"email": [
+# 			"has already been taken"
+# 		]
+# 	}
+# }
