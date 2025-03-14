@@ -27,6 +27,15 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
+# Setup Guardian config:
+# https://hexdocs.pm/guardian/tutorial-start.html#setup-guardian-config
+config :real_deal_api, RealDealApiWeb.Auth.Guardian,
+  issuer: "real_deal_api",
+  secret_key: "eUn5rc3c7LozyE9B7sZPZWh+ZHse4Tv8ti0/9ZZH7Lz2jjpsltSAAmYT38p4+YU2"
+
+# ↑↑↑ run `mix guardian.gen.secret` ↑↑↑,
+# the generator provided with Guardian (HS512 algorithm).
+
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 

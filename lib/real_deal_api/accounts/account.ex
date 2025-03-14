@@ -22,10 +22,22 @@ defmodule RealDealApi.Accounts.Account do
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
     |> validate_length(:email, max: 160)
     |> unique_constraint(:email)
+    |> put_password_hash()
   end
+
+  # Encryption of the password if the previous validations are passed,
+  # otherwise it does not hash the password.
+  defp put_password_hash(
+         %Ecto.Changeset{valid?: true, changes: %{hash_password: hash_password}} = changeset
+       ) do
+    change(changeset, hash_password: Bcrypt.hash_pwd_salt(hash_password))
+  end
+
+  defp put_password_hash(changeset), do: changeset
 end
 
 # REFERENCES:
+# https://neon.tech/postgresql/postgresql-tutorial/postgresql-delete-cascade
 # https://hexdocs.pm/ecto/associations.html#has-one-belongs-to
 
 # Account.changeset(%Account{}, %{email: "hello@hello.com", hash_password: "353gsa"}) =>
@@ -62,3 +74,27 @@ end
 #    inserted_at: ~U[2025-03-13 19:06:27Z],
 #    updated_at: ~U[2025-03-13 19:06:27Z]
 #  }}
+
+# Bcrypt examples: https://hexdocs.pm/bcrypt_elixir/Bcrypt.html#hash_pwd_salt/2-examples ==>
+# hash = Bcrypt.hash_pwd_salt("password")
+# Bcrypt.verify_pass("password", hash)
+# true
+
+# hash = Bcrypt.hash_pwd_salt("password")
+# Bcrypt.verify_pass("incorrect", hash)
+# false
+
+# Generating a struct `Ecto.Changeset` using the `changeset`
+# function with the password hashed using the `put_password_hash` function:
+# Account.changeset(%Account{}, %{email: "hello@hello.com", hash_password: "password"})
+# Ecto.Changeset<
+# action: nil,
+# changes: %{
+#   email: "hello@hello.com",
+#   hash_password: "$2b$12$NIsa0A5082tKBpM4WRhat.K8T8t98puyuX5RfzsWgffPn0sm7C5K2"
+# },
+# errors: [],
+# data: #RealDealApi.Accounts.Account<>,
+# valid?: true,
+# ...
+# >

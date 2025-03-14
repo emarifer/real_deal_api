@@ -24,4 +24,5 @@ defmodule RealDealApi.Users.User do
 end
 
 # REFERENCES:
+# https://neon.tech/postgresql/postgresql-tutorial/postgresql-delete-cascade
 # https://hexdocs.pm/ecto/associations.html#has-one-belongs-to
