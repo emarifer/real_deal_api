@@ -15,6 +15,23 @@ defmodule RealDealApiWeb.ErrorJSON do
   # By default, Phoenix returns the status message from
   # the template name. For example, "404.json" becomes
   # "Not Found".
+
+  def render("401.json", _assigns) do
+    %{errors: %{detail: "Email or Password incorrect."}}
+  end
+
+  # ↑↑↑ Custom message. If not customized, Phoenix will return ↑↑↑
+  # the error message corresponding to the status
+  # (in this case, 'Unauthorized'): ==>
+  # {
+  #   "errors": {
+  #     "detail": "Unauthorized"
+  #   }
+  # }
+  # IMPORTANT: To match and not render the default Phoenix HTML template,
+  # these `render` functions must be placed above the one that
+  # renders the HTML template.
+
   def render(template, _assigns) do
     %{errors: %{detail: Phoenix.Controller.status_message_from_template(template)}}
   end

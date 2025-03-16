@@ -1,6 +1,7 @@
 defmodule RealDealApiWeb.AccountController do
   use RealDealApiWeb, :controller
 
+  # alias RealDealApiWeb.{Auth.Guardian, Auth.ErrorResponse}
   alias RealDealApiWeb.Auth.Guardian
   alias RealDealApi.{Accounts, Accounts.Account, Users, Users.User}
 
@@ -19,6 +20,27 @@ defmodule RealDealApiWeb.AccountController do
       |> put_status(:created)
       |> render(:show_account_token, %{account: account, token: token})
     end
+  end
+
+  def sign_in(conn, %{"email" => email, "hash_password" => hash_password}) do
+    with {:ok, account, token} <- Guardian.authenticate(email, hash_password) do
+      conn
+      |> put_status(:ok)
+      |> render(:show_account_token, %{account: account, token: token})
+    end
+
+    # case Guardian.authenticate(email, hash_password) do
+    #   {:ok, account, token} ->
+    #     conn
+    #     |> put_status(:ok)
+    #     |> render(:show_account_token, %{account: account, token: token})
+
+    #   {:error, :unauthorized} ->
+    #     raise ErrorResponse.Unauthorized, message: "Email or Password incorrect."
+    # end
+    # ↑↑↑ Custom handling using exceptions ↑↑↑
+    # https://hexdocs.pm/phoenix/json_and_apis.html#action-fallback
+    # https://hexdocs.pm/phoenix/custom_error_pages.html
   end
 
   def show(conn, %{"id" => id}) do

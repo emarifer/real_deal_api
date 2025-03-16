@@ -1,5 +1,17 @@
 defmodule RealDealApiWeb.Router do
   use RealDealApiWeb, :router
+  # use Plug.ErrorHandler
+
+  # defp handle_errors(conn, %{reason: %Phoenix.Router.NoRouteError{message: message}}) do
+  #   conn |> json(%{errors: message}) |> halt()
+  # end
+
+  # defp handle_errors(conn, %{reason: %{message: message}}) do
+  #   conn |> json(%{errors: message}) |> halt()
+  # end
+  # ↑↑↑ Custom handling using exceptions ↑↑↑
+  # https://hexdocs.pm/phoenix/json_and_apis.html#action-fallback
+  # https://hexdocs.pm/phoenix/custom_error_pages.html
 
   pipeline :api do
     plug :accepts, ["json"]
@@ -10,7 +22,8 @@ defmodule RealDealApiWeb.Router do
 
     get "/", DefaultController, :index
 
-    post "/accounts", AccountController, :create
+    post "/accounts/create", AccountController, :create
+    post "/accounts/sign_in", AccountController, :sign_in
 
     # resources "/accounts", AccountController, except: [:new, :edit]
     resources "/users", UserController, except: [:new, :edit]

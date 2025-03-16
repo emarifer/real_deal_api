@@ -21,4 +21,13 @@ defmodule RealDealApiWeb.FallbackController do
     |> put_view(html: RealDealApiWeb.ErrorHTML, json: RealDealApiWeb.ErrorJSON)
     |> render(:"404")
   end
+
+  # This clause handles the `account` resource when your email or password
+  # does not match what is stored in the DB ==> `status 401 unauthorized`
+  def call(conn, {:error, :unauthorized}) do
+    conn
+    |> put_status(:unauthorized)
+    |> put_view(html: RealDealApiWeb.ErrorHTML, json: RealDealApiWeb.ErrorJSON)
+    |> render(:"401")
+  end
 end
