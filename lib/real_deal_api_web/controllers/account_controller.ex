@@ -25,6 +25,7 @@ defmodule RealDealApiWeb.AccountController do
   def sign_in(conn, %{"email" => email, "hash_password" => hash_password}) do
     with {:ok, account, token} <- Guardian.authenticate(email, hash_password) do
       conn
+      |> Plug.Conn.put_session(:account_id, account.id)
       |> put_status(:ok)
       |> render(:show_account_token, %{account: account, token: token})
     end
@@ -43,15 +44,20 @@ defmodule RealDealApiWeb.AccountController do
     # https://hexdocs.pm/phoenix/custom_error_pages.html
   end
 
-  def show(conn, %{"id" => id}) do
-    account = Accounts.get_account!(id)
-    render(conn, :show, account: account)
-  rescue
-    _e in Ecto.Query.CastError ->
-      {:error, :bad_request}
+  def show(conn, %{"id" => _id}) do
+    # account = Accounts.get_account!(id)
+    # Now we get the account data from what is stored in the session
+    # ↓↓↓ once the user is authenticated. ↓↓↓
+    with %{assigns: %{account: account}} <- catch_error(conn) do
+      render(conn, :show, account: account)
+    end
 
-    _e in Ecto.NoResultsError ->
-      {:error, :not_found}
+    # rescue
+    #   _e in Ecto.Query.CastError ->
+    #     {:error, :bad_request}
+
+    #   _e in Ecto.NoResultsError ->
+    #     {:error, :not_found}
   end
 
   def update(conn, %{"id" => id, "account" => account_params}) do
@@ -69,6 +75,9 @@ defmodule RealDealApiWeb.AccountController do
       send_resp(conn, :no_content, "")
     end
   end
+
+  defp catch_error(%{assigns: %{account: %Account{}}} = conn), do: conn
+  defp catch_error(_conn), do: {:error, :unauthorized}
 end
 
 # REFERENCES:
@@ -76,5 +85,3 @@ end
 # https://elixirschool.com/en/lessons/intermediate/error_handling#error-handling-1
 
 # https://hoppscotch.io/
-# elixir difference between nanoweb and polyweb
-# elixir difference between behaviour vs protocol

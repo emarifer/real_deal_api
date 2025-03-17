@@ -21,7 +21,7 @@ defmodule RealDealApiWeb.ErrorJSON do
   end
 
   def render("401.json", _assigns) do
-    %{errors: %{detail: "Email or Password incorrect."}}
+    %{errors: %{detail: "Invalid credentials."}}
   end
 
   def render("404.json", _assigns) do
@@ -44,3 +44,16 @@ defmodule RealDealApiWeb.ErrorJSON do
     %{errors: %{detail: Phoenix.Controller.status_message_from_template(template)}}
   end
 end
+
+# NOTE:
+# https://www.nicholasmoen.com/blog/phoenix-custom-error-responses/
+# alias RealDealApiWeb.Auth.ErrorResponse
+
+# @doc "Render a JSON response with custom message."
+# def render(
+#       <<_status::binary-3>> <> ".json",
+#       %{conn: %{assigns: %{reason: %ErrorResponse.Unauthorized{message: message}}}}
+#     )
+#     when message != "" do
+#   %{errors: %{detail: message}}
+# end
