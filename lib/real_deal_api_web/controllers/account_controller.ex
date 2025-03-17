@@ -46,6 +46,12 @@ defmodule RealDealApiWeb.AccountController do
   def show(conn, %{"id" => id}) do
     account = Accounts.get_account!(id)
     render(conn, :show, account: account)
+  rescue
+    _e in Ecto.Query.CastError ->
+      {:error, :bad_request}
+
+    _e in Ecto.NoResultsError ->
+      {:error, :not_found}
   end
 
   def update(conn, %{"id" => id, "account" => account_params}) do
@@ -65,4 +71,10 @@ defmodule RealDealApiWeb.AccountController do
   end
 end
 
+# REFERENCES:
+# It’s possible to match multiple errors in a single rescue:
+# https://elixirschool.com/en/lessons/intermediate/error_handling#error-handling-1
+
 # https://hoppscotch.io/
+# elixir difference between nanoweb and polyweb
+# elixir difference between behaviour vs protocol

@@ -16,8 +16,16 @@ defmodule RealDealApiWeb.ErrorJSON do
   # the template name. For example, "404.json" becomes
   # "Not Found".
 
+  def render("400.json", _assigns) do
+    %{errors: %{detail: "Malformed input data."}}
+  end
+
   def render("401.json", _assigns) do
     %{errors: %{detail: "Email or Password incorrect."}}
+  end
+
+  def render("404.json", _assigns) do
+    %{errors: %{detail: "There is no resource with that ID."}}
   end
 
   # ↑↑↑ Custom message. If not customized, Phoenix will return ↑↑↑

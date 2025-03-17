@@ -17,6 +17,10 @@ defmodule RealDealApiWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :auth do
+    plug RealDealApiWeb.Auth.Pipeline
+  end
+
   scope "/api", RealDealApiWeb do
     pipe_through :api
 
@@ -27,6 +31,13 @@ defmodule RealDealApiWeb.Router do
 
     # resources "/accounts", AccountController, except: [:new, :edit]
     resources "/users", UserController, except: [:new, :edit]
+  end
+
+  # Routes protected by JWT.
+  scope "/api", RealDealApiWeb do
+    pipe_through [:api, :auth]
+
+    get "/accounts/by_id/:id", AccountController, :show
   end
 end
 
