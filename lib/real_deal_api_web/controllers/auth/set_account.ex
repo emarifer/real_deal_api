@@ -19,7 +19,13 @@ defmodule RealDealApiWeb.Auth.SetAccount do
     end
   end
 
-  defp manage_account(nil, conn), do: assign(conn, :account, nil)
+  defp manage_account(nil, conn),
+    do:
+      conn
+      |> RealDealApiWeb.Router.handle_errors(%{
+        reason: :unauthorized,
+        message: "You are not logged in"
+      })
 
   defp manage_account(account_id, conn) do
     account = Accounts.get_account!(account_id)
@@ -29,13 +35,6 @@ defmodule RealDealApiWeb.Auth.SetAccount do
       account_id && account -> assign(conn, :account, account)
       true -> assign(conn, :account, nil)
     end
-
-    # rescue
-    #   _e in Ecto.Query.CastError ->
-    #     {:error, :bad_request}
-
-    #   _e in Ecto.NoResultsError ->
-    #     {:error, :not_found}
   end
 end
 

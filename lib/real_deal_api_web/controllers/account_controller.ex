@@ -1,11 +1,20 @@
 defmodule RealDealApiWeb.AccountController do
   use RealDealApiWeb, :controller
 
-  # alias RealDealApiWeb.{Auth.Guardian, Auth.ErrorResponse}
+  alias RealDealApiWeb.Router
   alias RealDealApiWeb.Auth.Guardian
   alias RealDealApi.{Accounts, Accounts.Account, Users, Users.User}
 
   action_fallback RealDealApiWeb.FallbackController
+
+  plug :is_authorized_account when action in [:update, :delete]
+
+  # def handle_errors({conn, status, message}),
+  #   do:
+  #     conn
+  #     |> put_status(status)
+  #     |> json(%{errors: message})
+  #     |> halt()
 
   def index(conn, _params) do
     accounts = Accounts.list_accounts()
@@ -44,24 +53,22 @@ defmodule RealDealApiWeb.AccountController do
     # https://hexdocs.pm/phoenix/custom_error_pages.html
   end
 
-  def show(conn, %{"id" => _id}) do
-    # account = Accounts.get_account!(id)
-    # Now we get the account data from what is stored in the session
-    # ↓↓↓ once the user is authenticated. ↓↓↓
-    with %{assigns: %{account: account}} <- catch_error(conn) do
-      render(conn, :show, account: account)
-    end
+  # in case some of the arguments are missing
+  def sign_in(_conn, %{}), do: {:error, :bad_request}
 
-    # rescue
-    #   _e in Ecto.Query.CastError ->
-    #     {:error, :bad_request}
+  def show(conn, %{"id" => id}) do
+    account = Accounts.get_account!(id)
+    render(conn, :show, account: account)
+  rescue
+    _e in Ecto.Query.CastError ->
+      {:error, :bad_request}
 
-    #   _e in Ecto.NoResultsError ->
-    #     {:error, :not_found}
+    _e in Ecto.NoResultsError ->
+      {:error, :not_found}
   end
 
-  def update(conn, %{"id" => id, "account" => account_params}) do
-    account = Accounts.get_account!(id)
+  def update(conn, %{"account" => account_params}) do
+    account = Accounts.get_account!(account_params["id"])
 
     with {:ok, %Account{} = account} <- Accounts.update_account(account, account_params) do
       render(conn, :show, account: account)
@@ -76,8 +83,46 @@ defmodule RealDealApiWeb.AccountController do
     end
   end
 
-  defp catch_error(%{assigns: %{account: %Account{}}} = conn), do: conn
-  defp catch_error(_conn), do: {:error, :unauthorized}
+  # This `plug` acts as a `middleware` (passes through or throws an error).
+  # Prevents any user (even if authenticated) from updating or
+  # deleting another user's account.
+  defp is_authorized_account(conn, _opts) do
+    %{params: %{"account" => params}} = conn
+    account = Accounts.get_account!(params["id"])
+
+    case conn.assigns.account.id == account.id do
+      true ->
+        conn
+
+      _ ->
+        conn
+        |> Router.handle_errors(%{
+          reason: :forbidden,
+          message: "You do not have access to this resource."
+        })
+    end
+  rescue
+    e in ArgumentError ->
+      conn
+      |> Router.handle_errors(%{
+        reason: :bad_request,
+        message: "ArgumentError: #{e.message}."
+      })
+
+    _e in Ecto.Query.CastError ->
+      conn
+      |> Router.handle_errors(%{
+        reason: :bad_request,
+        message: "Malformed input data."
+      })
+
+    _e in Ecto.NoResultsError ->
+      conn
+      |> Router.handle_errors(%{
+        reason: :not_found,
+        message: "There is no resource with that ID."
+      })
+  end
 end
 
 # REFERENCES:
