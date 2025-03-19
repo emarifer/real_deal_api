@@ -48,4 +48,14 @@ defmodule RealDealApiWeb.FallbackController do
     |> put_view(html: RealDealApiWeb.ErrorHTML, json: RealDealApiWeb.ErrorJSON)
     |> render(:"401")
   end
+
+  # This clause is for handling resources that cannot be found
+  # related to refresh tokens
+  # [specifically for `Guardian.decode_and_verify(old_token)`].
+  def call(conn, {:error, _reason}) do
+    conn
+    |> put_status(:not_found)
+    |> put_view(html: RealDealApiWeb.ErrorHTML, json: RealDealApiWeb.ErrorJSON)
+    |> render(:"404")
+  end
 end

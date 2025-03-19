@@ -56,6 +56,21 @@ defmodule RealDealApiWeb.AccountController do
   # in case some of the arguments are missing
   def sign_in(_conn, %{}), do: {:error, :bad_request}
 
+  def refresh_session(conn, %{}) do
+    old_token = Guardian.Plug.current_token(conn)
+
+    # We use Elixir's monadic `with` API instead of the `case` statement.
+    with {:ok, claims} <- Guardian.decode_and_verify(old_token),
+         {:ok, account} <- Guardian.resource_from_claims(claims) do
+      {:ok, _old, {new_token, _new_claims}} = Guardian.refresh(old_token)
+
+      conn
+      |> Plug.Conn.put_session(:account_id, account.id)
+      |> put_status(:ok)
+      |> render(:show_account_token, %{account: account, token: new_token})
+    end
+  end
+
   def sign_out(conn, %{}) do
     account = conn.assigns[:account]
     token = Guardian.Plug.current_token(conn)
@@ -141,3 +156,27 @@ end
 # https://elixirschool.com/en/lessons/intermediate/error_handling#error-handling-1
 
 # https://hoppscotch.io/
+
+# Alternative implementation for the `refresh_session` action:
+# def refresh_session(conn, %{}) do
+# old_token = Guardian.Plug.current_token(conn)
+
+# case Guardian.decode_and_verify(old_token) do
+#   {:ok, claims} ->
+#     case Guardian.resource_from_claims(claims) do
+#       {:ok, account} ->
+#         {:ok, _old, {new_token, _new_claims}} = Guardian.refresh(old_token)
+
+#         conn
+#         |> Plug.Conn.put_session(:account_id, account.id)
+#         |> put_status(:ok)
+#         |> render(:show_account_token, %{account: account, token: new_token})
+
+#       {:error, _reason} ->
+#         {:error, :not_found}
+#     end
+
+#   {:error, _reason} ->
+#     {:error, :not_found}
+#   end
+# end
