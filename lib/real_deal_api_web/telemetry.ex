@@ -11,13 +11,23 @@ defmodule RealDealApiWeb.Telemetry do
     children = [
       # Telemetry poller will execute the given period measurements
       # every 10_000ms. Learn more here: https://hexdocs.pm/telemetry_metrics
-      {:telemetry_poller, measurements: periodic_measurements(), period: 10_000}
+      {:telemetry_poller, measurements: periodic_measurements(), period: 10_000},
+      {Guardian.DB.Sweeper, []}
       # Add reporters as children of your supervision tree.
       # {Telemetry.Metrics.ConsoleReporter, metrics: metrics()}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)
   end
+
+  # ↑↑↑ Guardian.DB Configuration. ↑↑↑
+  # There is an error in the documentation regarding the Phoenix Framework
+  # configuration of this module, which has not yet been corrected
+  # despite a pull request dated November 13, 2023.
+  # Here is the pull request and the correct documentation for the configuration:
+  # https://github.com/ueberauth/guardian_db/pull/145
+  # https://github.com/ueberauth/guardian_db/commit/1003ca148525d8589a7b154fcb9f2a257d27eec2
+  # https://github.com/ueberauth/guardian_db/commit/1d1671934ae4c38c02310c324044d3542ec599ad
 
   def metrics do
     [
