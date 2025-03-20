@@ -12,7 +12,8 @@ defmodule RealDealApiWeb.Telemetry do
       # Telemetry poller will execute the given period measurements
       # every 10_000ms. Learn more here: https://hexdocs.pm/telemetry_metrics
       {:telemetry_poller, measurements: periodic_measurements(), period: 10_000},
-      {Guardian.DB.Sweeper, []}
+      # ↓↓↓ swept every hour (1000ms * 60s * 60min) ↓↓↓
+      {Guardian.DB.Sweeper, [interval: 1000 * 60 * 60]}
       # Add reporters as children of your supervision tree.
       # {Telemetry.Metrics.ConsoleReporter, metrics: metrics()}
     ]

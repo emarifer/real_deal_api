@@ -49,8 +49,9 @@ config :phoenix, :json_library, Jason
 # https://github.com/ueberauth/guardian_db/commit/1d1671934ae4c38c02310c324044d3542ec599ad
 config :guardian, Guardian.DB,
   repo: RealDealApi.Repo,
-  schema_name: "guardian_tokens",
-  sweep_interval: 60
+  schema_name: "guardian_tokens"
+
+# sweep_interval: 60
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

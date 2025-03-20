@@ -23,47 +23,34 @@ defmodule RealDealApiWeb.AccountController do
 
   def create(conn, %{"account" => account_params}) do
     with {:ok, %Account{} = account} <- Accounts.create_account(account_params),
-         {:ok, token, _claims} <- Guardian.encode_and_sign(account),
          {:ok, %User{} = _user} <- Users.create_user(account, account_params) do
-      conn
-      |> put_status(:created)
-      |> render(:show_account_token, %{account: account, token: token})
+      authorize_account(conn, account.email, account_params["hash_password"], :created)
     end
   end
 
+  # in case the `account` argument is missing
+  def create(_conn, %{}), do: {:error, :bad_request}
+
   def sign_in(conn, %{"email" => email, "hash_password" => hash_password}) do
-    with {:ok, account, token} <- Guardian.authenticate(email, hash_password) do
-      conn
-      |> Plug.Conn.put_session(:account_id, account.id)
-      |> put_status(:ok)
-      |> render(:show_account_token, %{account: account, token: token})
-    end
-
-    # case Guardian.authenticate(email, hash_password) do
-    #   {:ok, account, token} ->
-    #     conn
-    #     |> put_status(:ok)
-    #     |> render(:show_account_token, %{account: account, token: token})
-
-    #   {:error, :unauthorized} ->
-    #     raise ErrorResponse.Unauthorized, message: "Email or Password incorrect."
-    # end
-    # ↑↑↑ Custom handling using exceptions ↑↑↑
-    # https://hexdocs.pm/phoenix/json_and_apis.html#action-fallback
-    # https://hexdocs.pm/phoenix/custom_error_pages.html
+    authorize_account(conn, email, hash_password, :ok)
   end
 
   # in case some of the arguments are missing
   def sign_in(_conn, %{}), do: {:error, :bad_request}
 
+  defp authorize_account(conn, email, hash_password, status) do
+    with {:ok, account, token} <- Guardian.authenticate(email, hash_password) do
+      conn
+      |> Plug.Conn.put_session(:account_id, account.id)
+      |> put_status(status)
+      |> render(:show_account_token, %{account: account, token: token})
+    end
+  end
+
   def refresh_session(conn, %{}) do
     old_token = Guardian.Plug.current_token(conn)
 
-    # We use Elixir's monadic `with` API instead of the `case` statement.
-    with {:ok, claims} <- Guardian.decode_and_verify(old_token),
-         {:ok, account} <- Guardian.resource_from_claims(claims) do
-      {:ok, _old, {new_token, _new_claims}} = Guardian.refresh(old_token)
-
+    with {:ok, account, new_token} <- Guardian.authenticate(old_token) do
       conn
       |> Plug.Conn.put_session(:account_id, account.id)
       |> put_status(:ok)
@@ -180,3 +167,17 @@ end
 #     {:error, :not_found}
 #   end
 # end
+
+# Alternative implementation for the authentication:
+# case Guardian.authenticate(email, hash_password) do
+#   {:ok, account, token} ->
+#     conn
+#     |> put_status(:ok)
+#     |> render(:show_account_token, %{account: account, token: token})
+
+#   {:error, :unauthorized} ->
+#     raise ErrorResponse.Unauthorized, message: "Email or Password incorrect."
+# end
+# ↑↑↑ Custom handling using exceptions ↑↑↑
+# https://hexdocs.pm/phoenix/json_and_apis.html#action-fallback
+# https://hexdocs.pm/phoenix/custom_error_pages.html

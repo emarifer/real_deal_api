@@ -14,14 +14,8 @@ defmodule RealDealApiWeb.Auth.Guardian do
   end
 
   def resource_from_claims(%{"sub" => id}) do
-    # case Accounts.get_account!(id) do
-    #   nil ->
-    #     {:error, :not_found}
-
-    #   resource ->
-    #     {:ok, resource}
-    # end
     resource = Accounts.get_account!(id)
+
     {:ok, resource}
   rescue
     _e in Ecto.NoResultsError -> {:error, :not_found}
@@ -39,7 +33,7 @@ defmodule RealDealApiWeb.Auth.Guardian do
       account ->
         case validate_password?(password, account.hash_password) do
           true ->
-            create_token(account)
+            create_token(account, :access)
 
           false ->
             {:error, :unauthorized}
@@ -47,14 +41,33 @@ defmodule RealDealApiWeb.Auth.Guardian do
     end
   end
 
+  def authenticate(old_token) do
+    # We use Elixir's monadic `with` API instead of the `case` statement.
+    with {:ok, claims} <- decode_and_verify(old_token),
+         {:ok, account} <- resource_from_claims(claims),
+         {:ok, _old, {new_token, _new_claims}} = refresh(old_token, token_options(:access)) do
+      {:ok, account, new_token}
+    end
+  end
+
   defp validate_password?(password, hash_password) do
     Bcrypt.verify_pass(password, hash_password)
   end
 
-  defp create_token(account) do
-    {:ok, token, _claims} = encode_and_sign(account)
+  defp create_token(account, type) do
+    {:ok, token, _claims} =
+      encode_and_sign(account, %{}, token_options(type))
 
     {:ok, account, token}
+  end
+
+  defp token_options(type) do
+    case type do
+      :access ->
+        [token_type: "access", ttl: {2, :hour}]
+        # :reset -> [token_type: "reset", ttl: {15, :minute}]
+        # :admin -> [token_type: "admin", ttl: {90, :day}]
+    end
   end
 
   def after_encode_and_sign(resource, claims, token, _options) do
