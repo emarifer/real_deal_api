@@ -72,6 +72,27 @@ defmodule RealDealApi.Accounts do
   # https://hexdocs.pm/elixir/Kernel.SpecialForms.html#%5E/1
 
   @doc """
+  Gets a full account [account.any()] by given id.
+
+  Returns 'nil' if the Account does not exist.
+
+   ## Examples
+
+     iex> get_full_account("c8d0edb6-dc33-4f9f-9645-a555552ebc5a")
+     %Account{}
+
+     iex> get_account_by_email("no-valid-id")
+     nil
+
+  """
+  def get_full_account(id) do
+    Account
+    |> where(id: ^id)
+    |> preload([:user])
+    |> Repo.one()
+  end
+
+  @doc """
   Creates a account.
 
   ## Examples

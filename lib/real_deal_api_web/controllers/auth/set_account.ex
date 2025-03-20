@@ -28,7 +28,7 @@ defmodule RealDealApiWeb.Auth.SetAccount do
       })
 
   defp manage_account(account_id, conn) do
-    account = Accounts.get_account!(account_id)
+    account = Accounts.get_full_account(account_id)
 
     # See note below
     cond do

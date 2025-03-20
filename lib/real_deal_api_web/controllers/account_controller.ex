@@ -70,18 +70,17 @@ defmodule RealDealApiWeb.AccountController do
   end
 
   def show(conn, %{"id" => id}) do
-    account = Accounts.get_account!(id)
-    render(conn, :show, account: account)
+    case Accounts.get_full_account(id) do
+      nil -> {:error, :not_found}
+      account -> render(conn, :show, account: account)
+    end
   rescue
     _e in Ecto.Query.CastError ->
       {:error, :bad_request}
-
-    _e in Ecto.NoResultsError ->
-      {:error, :not_found}
   end
 
   def update(conn, %{"account" => account_params}) do
-    account = Accounts.get_account!(account_params["id"])
+    account = Accounts.get_full_account(account_params["id"])
 
     with {:ok, %Account{} = account} <- Accounts.update_account(account, account_params) do
       render(conn, :show, account: account)
