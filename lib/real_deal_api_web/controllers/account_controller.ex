@@ -73,13 +73,29 @@ defmodule RealDealApiWeb.AccountController do
       {:error, :bad_request}
   end
 
-  def update(conn, %{"account" => account_params}) do
-    account = Accounts.get_full_account(account_params["id"])
+  def current_account(conn, %{}) do
+    conn
+    |> put_status(:ok)
+    |> render(:show, account: conn.assigns.account)
+  end
 
-    with {:ok, %Account{} = account} <- Accounts.update_account(account, account_params) do
-      render(conn, :show, account: account)
+  def update(
+        conn,
+        %{"current_hash" => current_hash, "account" => account_params}
+      ) do
+    case Guardian.validate_password?(current_hash, conn.assigns.account.hash_password) do
+      true ->
+        with {:ok, %Account{} = account} <-
+               Accounts.update_account(conn.assigns.account, account_params) do
+          render(conn, :show, account: account)
+        end
+
+      false ->
+        {:error, :unauthorized}
     end
   end
+
+  def update(_conn, %{}), do: {:error, :bad_request}
 
   def delete(conn, %{"id" => id}) do
     account = Accounts.get_account!(id)
@@ -133,6 +149,10 @@ end
 # ↑↑↑ Custom handling using exceptions ↑↑↑
 # https://hexdocs.pm/phoenix/json_and_apis.html#action-fallback
 # https://hexdocs.pm/phoenix/custom_error_pages.html
+# ↓↓↓                                          ↓↓↓
+# defmodule RealDealApiWeb.Auth.ErrorResponse.Unauthorized do
+#   defexception message: "Unauthorized", plug_status: 401
+# end
 
 # This `plug` acts as a `middleware` (passes through or throws an error).
 # Prevents any user (even if authenticated) from updating or
