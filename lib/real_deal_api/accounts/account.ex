@@ -4,6 +4,7 @@ defmodule RealDealApi.Accounts.Account do
 
   alias RealDealApi.Users.User
 
+  @optional_fields [:id, :inserted_at, :updated_at]
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "accounts" do
@@ -14,11 +15,16 @@ defmodule RealDealApi.Accounts.Account do
     timestamps(type: :utc_datetime)
   end
 
+  # see note below.
+  defp all_fields do
+    __MODULE__.__schema__(:fields)
+  end
+
   @doc false
   def changeset(account, attrs) do
     account
-    |> cast(attrs, [:email, :hash_password])
-    |> validate_required([:email, :hash_password])
+    |> cast(attrs, all_fields())
+    |> validate_required(all_fields() -- @optional_fields)
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
     |> validate_length(:email, max: 160)
     |> unique_constraint(:email)
@@ -39,6 +45,14 @@ end
 # REFERENCES:
 # https://neon.tech/postgresql/postgresql-tutorial/postgresql-delete-cascade
 # https://hexdocs.pm/ecto/associations.html#has-one-belongs-to
+
+# NOTE:
+# Trick to add more fields "dynamically" to the schema using
+# an `all_fields/0` function and a module attribute (@optional_fields):
+# https://youtu.be/RZLuB4vGPJI?si=v8j6Ji-ewjoAuzpG&t=171
+# "Reflection: Any schema module will generate the __schema__ function
+# ↓↓↓ that can be used for runtime introspection of the schema." ↓↓↓
+# https://hexdocs.pm/ecto/Ecto.Schema.html#module-reflection
 
 # Account.changeset(%Account{}, %{email: "hello@hello.com", hash_password: "353gsa"}) =>
 # Ecto.Changeset<
