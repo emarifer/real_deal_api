@@ -33,7 +33,7 @@ defmodule RealDealApiWeb.Router do
     post "/accounts/sign_in", AccountController, :sign_in
 
     # resources "/accounts", AccountController, except: [:new, :edit]
-    resources "/users", UserController, except: [:new, :edit]
+    # resources "/users", UserController, except: [:new, :edit]
   end
 
   # Routes protected by JWT.
@@ -43,9 +43,15 @@ defmodule RealDealApiWeb.Router do
     get "/accounts/by_id/:id", AccountController, :show
     get "/accounts/sign_out", AccountController, :sign_out
     get "/accounts/refresh_session", AccountController, :refresh_session
-    patch "/accounts/update", AccountController, :update
+    # ↓↓↓ See note below ↓↓↓
+    post "/accounts/update", AccountController, :update
+    put "/users/update", UserController, :update
   end
 end
+
+# NOTE:
+# Reason to use the POST method instead of PUT or PATCH.
+# https://youtu.be/QPeq4IWIRPI?si=VxenFzbtGH4TMc8K&t=491
 
 # API routes:
 # mix phx.routes | grep accounts ==>
