@@ -1,6 +1,5 @@
 defmodule RealDealApi.Schema.AccountTest do
-  alias Ecto.Changeset
-  use RealDealApi.DataCase
+  use RealDealApi.SchemaCase
 
   alias RealDealApi.Accounts.Account
 
@@ -30,15 +29,7 @@ defmodule RealDealApi.Schema.AccountTest do
 
   describe "changeset/2" do
     test "success: returns a valid changeset when given valid arguments" do
-      valid_params = %{
-        "id" => Ecto.UUID.generate(),
-        "email" => "test@email.com",
-        "hash_password" => "test password",
-        "inserted_at" => DateTime.utc_now() |> DateTime.truncate(:second),
-        "updated_at" => DateTime.utc_now() |> DateTime.truncate(:second)
-      }
-
-      # ↑↑↑ see note2 below. ↑↑↑
+      valid_params = valid_params(@expected_fields_with_types)
 
       changeset = Account.changeset(%Account{}, valid_params)
 
@@ -60,13 +51,7 @@ defmodule RealDealApi.Schema.AccountTest do
     end
 
     test "error: returns an error changeset when given un-castable values" do
-      invalid_params = %{
-        "id" => DateTime.utc_now() |> DateTime.truncate(:second),
-        "email" => DateTime.utc_now() |> DateTime.truncate(:second),
-        "hash_password" => DateTime.utc_now() |> DateTime.truncate(:second),
-        "inserted_at" => "lets put a string here",
-        "updated_at" => "updated to a string"
-      }
+      invalid_params = invalid_params(@expected_fields_with_types)
 
       assert %Changeset{valid?: false, errors: errors} =
                Account.changeset(%Account{}, invalid_params)
@@ -115,12 +100,6 @@ end
 # In the migration file
 # (priv/repo/migrations/20250313165938_create_accounts.exs) in Phoenix
 # schema generator, it now uses `:utc_datetime` by default.
-
-# NOTE2 ==>
-# `DateTime.utc_now/0` generates decimals in seconds so it does not match what
-# comes from `Ecto.changeset/2`, so you have to truncate the input parameters
-# to seconds using `DateTime.truncate/2`:
-# https://stackoverflow.com/questions/53717074/insert-all-does-not-match-type-utc-datetime#53718084
 
 # casting error ==>
 # Account.changeset(%Account{}, invalid_params) ==>

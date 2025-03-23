@@ -1,6 +1,5 @@
 defmodule RealDealApi.Schema.UserTest do
-  alias Ecto.Changeset
-  use RealDealApi.DataCase
+  use RealDealApi.SchemaCase
 
   alias RealDealApi.Users.User
 
@@ -30,15 +29,7 @@ defmodule RealDealApi.Schema.UserTest do
 
   describe "changeset/2" do
     test "success: returns a valid changeset when given valid arguments" do
-      valid_params = %{
-        "id" => Ecto.UUID.generate(),
-        "full_name" => "test name",
-        "gender" => "programmer",
-        "biography" => "a lifetime of coding",
-        "account_id" => Ecto.UUID.generate(),
-        "inserted_at" => DateTime.utc_now() |> DateTime.truncate(:second),
-        "updated_at" => DateTime.utc_now() |> DateTime.truncate(:second)
-      }
+      valid_params = valid_params(@expected_fields_with_types)
 
       changeset = User.changeset(%User{}, valid_params)
 
@@ -54,15 +45,7 @@ defmodule RealDealApi.Schema.UserTest do
     end
 
     test "error: returns an error changeset when given un-castable values" do
-      invalid_params = %{
-        "id" => DateTime.utc_now() |> DateTime.truncate(:second),
-        "full_name" => DateTime.utc_now() |> DateTime.truncate(:second),
-        "gender" => DateTime.utc_now() |> DateTime.truncate(:second),
-        "biography" => DateTime.utc_now() |> DateTime.truncate(:second),
-        "account_id" => DateTime.utc_now() |> DateTime.truncate(:second),
-        "inserted_at" => "lets put a string here",
-        "updated_at" => "updated to a string"
-      }
+      invalid_params = invalid_params(@expected_fields_with_types)
 
       assert %Changeset{valid?: false, errors: errors} =
                User.changeset(%User{}, invalid_params)
