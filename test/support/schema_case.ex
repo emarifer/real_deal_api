@@ -13,6 +13,13 @@ defmodule RealDealApi.SchemaCase do
     end
   end
 
+  # About configuring the connection to the database for testing:
+  # https://youtu.be/M3iWksKfSZk?si=uyVx4xs-v17HivCQ&t=721
+  # https://hexdocs.pm/ecto_sql/Ecto.Adapters.SQL.Sandbox.html
+  setup _ do
+    Ecto.Adapters.SQL.Sandbox.mode(RealDealApi.Repo, :manual)
+  end
+
   def valid_params(fields_with_types) do
     valid_value_by_type = %{
       binary_id: fn -> Faker.UUID.v4() end,

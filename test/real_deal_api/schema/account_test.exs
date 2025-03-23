@@ -91,6 +91,33 @@ defmodule RealDealApi.Schema.AccountTest do
         refute errors[field], "The optional field #{field} is required when it shouldn't be."
       end
     end
+
+    test "error: returns error changeset when an email address is reused" do
+      Ecto.Adapters.SQL.Sandbox.checkout(RealDealApi.Repo)
+
+      {:ok, existing_account} =
+        %Account{}
+        |> Account.changeset(valid_params(@expected_fields_with_types))
+        |> RealDealApi.Repo.insert()
+
+      changeset_with_repeated_email =
+        %Account{}
+        |> Account.changeset(
+          valid_params(@expected_fields_with_types)
+          |> Map.put("email", existing_account.email)
+        )
+
+      assert {:error, %Changeset{valid?: false, errors: errors}} =
+               RealDealApi.Repo.insert(changeset_with_repeated_email)
+
+      assert errors[:email], "The field :email is misssing from errors."
+
+      {_, meta} = errors[:email]
+
+      # We claim this is a unique constraint error
+      assert meta[:constraint] == :unique,
+             "The constraint type, #{meta[:constraint]}, is incorrect."
+    end
   end
 end
 
@@ -130,3 +157,16 @@ end
 # valid?: false,
 # ...
 # >
+
+# How to view the constraints of a table through the Ecto.Changeset object:
+# changeset.constraints ==>
+# [
+#   %{
+#     match: :exact,
+#     type: :unique,
+#     constraint: "accounts_email_index",
+#     error_type: :unique,
+#     field: :email,
+#     error_message: "has already been taken"
+#   }
+# ]
