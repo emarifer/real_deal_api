@@ -17,7 +17,7 @@ defmodule RealDealApi.Users.User do
   end
 
   # see note below.
-  def all_fields do
+  defp all_fields do
     __MODULE__.__schema__(:fields)
   end
 

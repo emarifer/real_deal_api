@@ -17,7 +17,7 @@ defmodule RealDealApi.AccountsTest do
       assert {:ok, %Account{} = returned_account} =
                Accounts.create_account(params)
 
-      #  We verify that the returned value is the one inserted into the DB.
+      # We verify that the returned value is the one inserted into the DB.
       account_from_db = Repo.get(Account, returned_account.id)
 
       assert returned_account == account_from_db
