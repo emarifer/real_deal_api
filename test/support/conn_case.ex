@@ -15,24 +15,24 @@ defmodule RealDealApiWeb.ConnCase do
   this option is not recommended for other databases.
   """
 
-  use ExUnit.CaseTemplate
+  # use ExUnit.CaseTemplate
 
-  using do
-    quote do
-      # The default endpoint for testing
-      @endpoint RealDealApiWeb.Endpoint
+  # using do
+  #   quote do
+  #     # The default endpoint for testing
+  #     @endpoint RealDealApiWeb.Endpoint
 
-      use RealDealApiWeb, :verified_routes
+  #     use RealDealApiWeb, :verified_routes
 
-      # Import conveniences for testing with connections
-      import Plug.Conn
-      import Phoenix.ConnTest
-      import RealDealApiWeb.ConnCase
-    end
-  end
+  #     # Import conveniences for testing with connections
+  #     import Plug.Conn
+  #     import Phoenix.ConnTest
+  #     import RealDealApiWeb.ConnCase
+  #   end
+  # end
 
-  setup tags do
-    RealDealApi.DataCase.setup_sandbox(tags)
-    {:ok, conn: Phoenix.ConnTest.build_conn()}
-  end
+  # setup tags do
+  #   RealDealApi.DataCase.setup_sandbox(tags)
+  #   {:ok, conn: Phoenix.ConnTest.build_conn()}
+  # end
 end

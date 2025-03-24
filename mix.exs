@@ -44,7 +44,8 @@ defmodule RealDealApi.MixProject do
       {:bcrypt_elixir, "~> 3.2"},
       {:guardian, "~> 2.3"},
       {:guardian_db, "~> 3.0"},
-      {:faker, "~> 0.18", only: :test}
+      {:faker, "~> 0.18", only: :test},
+      {:ex_machina, "~> 2.8.0", only: :test}
     ]
   end
 

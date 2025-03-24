@@ -93,6 +93,7 @@ defmodule RealDealApi.Schema.AccountTest do
     end
 
     test "error: returns error changeset when an email address is reused" do
+      # Initial configuration (test DB) for this test only.
       Ecto.Adapters.SQL.Sandbox.checkout(RealDealApi.Repo)
 
       {:ok, existing_account} =
