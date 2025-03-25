@@ -32,4 +32,25 @@ defmodule RealDealApi.UsersTest do
                Users.create_user(%Account{}, missing_params)
     end
   end
+
+  describe "get_user!/1" do
+    test "success: it returns an user when given a valid UUID" do
+      account_with_user_params = Factory.string_params_for(:accountfull)
+
+      # This has already been tested in `AccountsTest`.
+      {:ok, returned_account} =
+        Accounts.create_account(account_with_user_params)
+
+      assert {:ok, %User{} = returned_user} =
+               Users.create_user(returned_account, account_with_user_params)
+
+      user_from_db = Users.get_user!(returned_user.id)
+
+      assert returned_user == user_from_db
+    end
+
+    test "error: raises a Ecto.NoResultsError when an user doesn't exist" do
+      assert_raise Ecto.NoResultsError, fn -> Users.get_user!(Ecto.UUID.autogenerate()) end
+    end
+  end
 end
