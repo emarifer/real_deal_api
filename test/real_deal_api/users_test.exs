@@ -81,4 +81,14 @@ defmodule RealDealApi.UsersTest do
       assert existing_full_account.user == Repo.get(User, existing_full_account.user.id)
     end
   end
+
+  describe "delete_user/1" do
+    test "success: it deletes the user" do
+      full_account = Factory.insert(:accountfull)
+
+      assert {:ok, _deleted_user} = Users.delete_user(full_account.user)
+
+      refute Repo.get(User, full_account.user.id)
+    end
+  end
 end
