@@ -50,6 +50,47 @@ defmodule RealDealApi.AccountsTest do
                Accounts.create_account(missing_params)
     end
   end
+
+  describe "get_account!/1" do
+    test "success: it returns an account when given a valid UUID" do
+      existing_account = Factory.insert(:account)
+      assert returned_account = Accounts.get_account!(existing_account.id)
+
+      assert returned_account == existing_account
+    end
+
+    test "error: raises a Ecto.NoResultsError when an account doesn't exist" do
+      assert_raise Ecto.NoResultsError, fn -> Accounts.get_account!(Ecto.UUID.autogenerate()) end
+    end
+  end
+
+  describe "get_account_by_email/1" do
+    test "success: it returns an account when given a valid email" do
+      existing_account = Factory.insert(:account)
+      assert returned_account = Accounts.get_account_by_email(existing_account.email)
+
+      assert returned_account == existing_account
+    end
+
+    test "error: returns nil when there is no account with the given email" do
+      refute Accounts.get_account_by_email(Faker.Internet.email()),
+             "The return value of the `get_account_by_email/1` function is not nil when it should be."
+    end
+  end
+
+  describe "get_full_account/1" do
+    test "success: Returns a full acount when a valid UUID is provided" do
+      existing_full_account = Factory.insert(:accountfull)
+      assert returned_account = Accounts.get_full_account(existing_full_account.id)
+
+      assert returned_account == existing_full_account
+    end
+
+    test "error: returns nil when there is no full account with the given UUID" do
+      refute Accounts.get_full_account(Ecto.UUID.autogenerate()),
+             "The return value of the `get_full_account/1` function is not nil when it should be."
+    end
+  end
 end
 
 # NOTE:

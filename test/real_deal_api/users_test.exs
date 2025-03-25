@@ -10,17 +10,7 @@ defmodule RealDealApi.UsersTest do
 
   describe "create_user/2" do
     test "success: it inserts an user in the db and returns the user" do
-      params = Factory.string_params_for(:account)
-
-      # We create a map with some field of the `User` object as "full_name".
-      # The mandatory field `account_id` will be provided by
-      # the id of the `Account` object created in the DB.
-      account_with_user_params =
-        Map.put(
-          params,
-          "full_name",
-          Faker.Person.Es.first_name() <> " " <> Faker.Person.Es.last_name()
-        )
+      account_with_user_params = Factory.string_params_for(:accountfull)
 
       # This has already been tested in `AccountsTest`.
       {:ok, returned_account} =
